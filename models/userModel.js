@@ -15,32 +15,34 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: ["password is require", true],
     }
     ,
     confirmPassword: {
         type: String,
-        required: ["password is require", true],
+    },
+    otp: {
+        type: String,
+
     },
     token: {
         type: String
     }
 
 })
-userSchema.pre('save', async function (next) {
-    if (this.password === this.confirmPassword) {
-        this.password = await bcrypt.hash(this.password, 10)
-        this.confirmPassword = undefined
-    } else {
-        throw new error("password is not match")
-    }
-    next()
-})
+// userSchema.pre('save', async function (next) {
+//     if (this.password === this.confirmPassword) {
+//         this.password = await bcrypt.hash(this.password, 10)
+//         this.confirmPassword = undefined
+//     } else {
+//         throw new error("password is not match")
+//     }
+//     next()
+// })
 
-userSchema.post("save", async (doc, next) => {
-    doc.password = undefined
-    next()
-})
+// userSchema.post("save", async (doc, next) => {
+//     doc.password = undefined
+//     next()
+// })
 
 const user = mongoose.model("user", userSchema)
 module.exports = user
