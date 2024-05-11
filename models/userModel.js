@@ -1,5 +1,7 @@
 const mongoose = require("mongoose")
 const bcrypt = require("bcrypt")
+let currentTime = Date.now();
+const expirationTime = 10
 
 const userSchema = new mongoose.Schema({
     email: {
@@ -23,6 +25,10 @@ const userSchema = new mongoose.Schema({
     otp: {
         type: String,
 
+    },
+    expiration_time: {
+        type: Date,
+        default: new Date(currentTime + (expirationTime * 1000))
     },
     token: {
         type: String

@@ -1,5 +1,6 @@
 const user = require("../models/userModel.js");
 const bcrypt = require("bcrypt");
+require("dotenv").config()
 const jwt = require("jsonwebtoken");
 const secret_key = process.env.SECRET_KEY;
 const nodemailer = require("nodemailer");
@@ -72,14 +73,15 @@ const forgotPassword = async (req, res) => {
             const tranpoter = nodemailer.createTransport({
                 host: "smtp.gmail.com",
                 service: "gmail",
-                // port: 465,
-                // secure: true,
-                // requireTLS: true,
+                port: 587,
+                secure: true,
+                requireTLS: true,
                 auth: {
                     user: USER,
                     pass: PASS,
                 },
             });
+            const { email } = req.body
             let mailoption = {
                 from: "vakeelkhan4100@gmail.com",
                 to: email,
@@ -103,19 +105,45 @@ const forgotPassword = async (req, res) => {
     }
 };
 
+const twoStepVarificatin = async (req, res) => {
+    try {
+        const { email, otp } = req.body
+        let emailExite = await user.findOne({ email })
+        console.log(emailExite.otp, "fjfjfj")
+        if (emailExite) {
+            if (emailExite.otp === otp) {
+                res.send({
+                    status: true,
+                    message: "success"
+                })
+            } else {
+                res.send("otp is not match")
+            }
+        } else {
+            res.send("user is not difinded ")
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).end("Internal Server Error");
+    }
+}
 module.exports = {
     signup,
     login,
     forgotPassword,
+    twoStepVarificatin,
+
 };
 
 // Function to generate OTP
 function generateOTP() {
     let digits = "0123456789";
     let otp = "";
+    const expirationTimeInSeconds = 600 // 10 minutes
     for (let i = 0; i < 6; i++) {
         otp += digits[Math.floor(Math.random() * 10)];
     }
     return otp;
 }
-console.log(generateOTP());
+// console.log(generateOTP());
+
