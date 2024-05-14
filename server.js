@@ -6,7 +6,9 @@ app.use(bodyParse.json())
 
 const connect = require("./db/config.js")
 const userRouter = require("./routers/userRoute.js")
+const profileRouter = require("./routers/profileRoute.js")
 
+app.use("/profile", profileRouter)
 app.use("/user", userRouter)
 
 const port = process.env.PORT

@@ -105,11 +105,20 @@ const forgotPassword = async (req, res) => {
     }
 };
 
+// Function to generate OTP
+function generateOTP() {
+    let digits = "0123456789";
+    let otp = "";
+    for (let i = 0; i < 6; i++) {
+        otp += digits[Math.floor(Math.random() * 10)];
+    }
+    return otp;
+}
+
 const twoStepVarificatin = async (req, res) => {
     try {
         const { email, otp } = req.body
         let emailExite = await user.findOne({ email })
-        console.log(emailExite.otp, "fjfjfj")
         if (emailExite) {
             if (emailExite.otp === otp) {
                 res.send({
@@ -127,23 +136,40 @@ const twoStepVarificatin = async (req, res) => {
         return res.status(500).end("Internal Server Error");
     }
 }
+
+const resetPassword = async (req, res) => {
+    try {
+        const { email } = req.body
+        let userExist = await user.findOne({ email })
+        if (userExist) {
+            const { password, confirmPassword } = req.body
+            if (password == confirmPassword) {
+                userExist.password = password
+                userExist.confirmPassword = confirmPassword
+                res.send({
+                    status: true,
+                    message: "password reset  successfully",
+                    data: userExist
+                })
+            } else {
+                res.send("password not match ")
+            }
+        } else {
+            res.send("user not found")
+        }
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).end("Internal Server Error");
+    }
+}
+
 module.exports = {
     signup,
     login,
     forgotPassword,
     twoStepVarificatin,
-
+    resetPassword,
 };
 
-// Function to generate OTP
-function generateOTP() {
-    let digits = "0123456789";
-    let otp = "";
-    const expirationTimeInSeconds = 600 // 10 minutes
-    for (let i = 0; i < 6; i++) {
-        otp += digits[Math.floor(Math.random() * 10)];
-    }
-    return otp;
-}
-// console.log(generateOTP());
+
 
