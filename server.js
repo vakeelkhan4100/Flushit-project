@@ -9,7 +9,7 @@ const userRouter = require("./routers/userRoute.js")
 const profileRouter = require("./routers/profileRoute.js")
 
 app.use("/profile", profileRouter)
-app.use("/user", userRouter)
+app.use("user", userRouter)
 
 const port = process.env.PORT
 const ip = process.env.IP

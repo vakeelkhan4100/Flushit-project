@@ -9,6 +9,9 @@ const userSchema = new mongoose.Schema({
     mobile: {
         type: Number,
         require: true
+    },
+    imageUrl: {
+        type: String,
     }
 })
 const profile = mongoose.model("profile", userSchema)

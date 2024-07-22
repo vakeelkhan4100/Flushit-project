@@ -58,7 +58,7 @@ const login = async (req, res) => {
             });
         }
     } catch (error) {
-        res.send(eror.message);
+        res.send(error.message);
     }
 };
 
