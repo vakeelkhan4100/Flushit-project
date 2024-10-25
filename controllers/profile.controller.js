@@ -1,6 +1,7 @@
 const profile = require("../models/profile.model.js")
 const user = require("../models/userModel.js")
 const multer = require("multer")
+
 const createProfile = async (req, res) => {
     try {
         const { email, mobile } = req.body
@@ -17,19 +18,15 @@ const createProfile = async (req, res) => {
                     imageUrl: imageUrl
                 })
                 res.send(data)
-
             }
-        } else {
-            res.send("user not found")
-        }
+        } else return res.send("user not found")
     }
     catch (error) {
-
+        res.send(error.message);
     }
 
 
 }
-
 
 const imageUpload = multer({
     storage: multer.diskStorage({
@@ -41,8 +38,6 @@ const imageUpload = multer({
         }
     })
 })
-
-
 
 
 const all = async (req, res) => {

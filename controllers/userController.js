@@ -1,11 +1,9 @@
 const user = require("../models/userModel.js");
 const bcrypt = require("bcrypt");
-require("dotenv").config()
 const jwt = require("jsonwebtoken");
 const secret_key = process.env.SECRET_KEY;
 const nodemailer = require("nodemailer");
-const USER = process.env.USERNAME;
-const PASS = process.env.PASS;
+const { USERNAME, PASS } = process.env
 const signup = async (req, res) => {
     try {
         const { email } = req.body;
@@ -14,52 +12,26 @@ const signup = async (req, res) => {
             res.status(403).json({ status: false, message: "user is alredy exist" });
         } else {
             const createUser = await user.create(req.body);
-            createUser.token = await jwt.sign(
-                { time: Date(), userId: createUser._id },
-                secret_key
-            );
-            res
-                .status(200)
-                .json({
-                    status: true,
-                    message: "user is create successfully",
-                    data: createUser,
-                });
+            req.session.token = await jwt.sign({ time: Date(), userId: createUser._id }, secret_key);
+            console.log(req.session.token)
+            res.status(200).json({ status: true, message: "user is create successfully", data: createUser });
         }
-    } catch (err) {
-        res.send(err.message);
-    }
+    } catch (err) { res.send(err.message) }
 };
 
 const login = async (req, res) => {
     try {
         const { email } = req.body;
-        const userExist = await user.findOne({ email });
+        const userExist = await user.findOne({ email: email });
         if (userExist) {
-            const checkpass = await bcrypt.compare(
-                req.body.password,
-                userExist.password
-            );
+            const checkpass = await bcrypt.compare(userExist.password, req.body.password);
             if (checkpass) {
-                res.status(200).json({
-                    status: true,
-                    message: "user login success",
-                });
-            } else {
-                res.json({
-                    status: false,
-                    message: "password is wrong ",
-                });
-            }
-        } else {
-            res.status(400).json({
-                status: false,
-                message: "user login failed",
-            });
-        }
-    } catch (error) {
-        res.send(error.message);
-    }
+                req.session.token = await jwt.sign({ time: Date(), userId: userExist._id }, secret_key);
+                console.log(req.session.token)
+                res.status(200).json({ status: true, message: "user login success" });
+            } else { return res.status(401).json({ status: false, message: "password is wrong " }); }
+        } else { return res.status(400).json({ status: false, message: "user login failed" }); }
+    } catch (error) { res.send(error.message) }
 };
 
 const forgotPassword = async (req, res) => {
@@ -77,7 +49,7 @@ const forgotPassword = async (req, res) => {
                 secure: true,
                 requireTLS: true,
                 auth: {
-                    user: USER,
+                    user: USERNAME,
                     pass: PASS,
                 },
             });
@@ -121,16 +93,10 @@ const twoStepVarificatin = async (req, res) => {
         let emailExite = await user.findOne({ email })
         if (emailExite) {
             if (emailExite.otp === otp) {
-                res.send({
-                    status: true,
-                    message: "success"
-                })
-            } else {
-                res.send("otp is not match")
+                res.send({ status: true, message: "success" })
             }
-        } else {
-            res.send("user is not difinded ")
-        }
+            else return res.send("otp is not match")
+        } else return res.send("user is not difinded ")
     } catch (error) {
         console.log(error.message);
         return res.status(500).end("Internal Server Error");
@@ -147,16 +113,10 @@ const resetPassword = async (req, res) => {
                 userExist.password = password
                 userExist.confirmPassword = confirmPassword
                 res.send({
-                    status: true,
-                    message: "password reset  successfully",
-                    data: userExist
+                    status: true, message: "password reset  successfully", data: userExist
                 })
-            } else {
-                res.send("password not match ")
-            }
-        } else {
-            res.send("user not found")
-        }
+            } else return res.send("password not match ")
+        } else return res.send("user not found")
     } catch (error) {
         console.log(error.message);
         return res.status(500).end("Internal Server Error");
