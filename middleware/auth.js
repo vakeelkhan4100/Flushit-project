@@ -12,5 +12,4 @@ const auth = async (req, res, next) => {
         res.status(500).send({ status: false, message: "invalid token" })
     }
 }
-
 module.exports = auth
